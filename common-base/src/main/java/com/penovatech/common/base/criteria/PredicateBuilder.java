@@ -1,4 +1,4 @@
-package com.penovatech.common.base;
+package com.penovatech.common.base.criteria;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;

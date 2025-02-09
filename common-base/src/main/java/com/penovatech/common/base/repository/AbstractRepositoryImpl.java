@@ -3,7 +3,7 @@ package com.penovatech.common.base.repository;
 import com.penovatech.common.model.AbstractCriteria;
 import com.penovatech.common.model.AbstractPersistable;
 import com.penovatech.common.model.AbstractPersistable_;
-import com.penovatech.common.base.PredicateBuilder;
+import com.penovatech.common.base.criteria.PredicateBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;

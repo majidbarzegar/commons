@@ -18,6 +18,6 @@ public abstract class AbstractAuditable<I extends Comparable<I>> extends Abstrac
         super(id);
     }
 
-    private LocalDateTime createdDate;
+    protected LocalDateTime createdDate;
 }
 

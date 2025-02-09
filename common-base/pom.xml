@@ -30,6 +30,10 @@
         </dependency>
         <dependency>
             <groupId>com.penovatech</groupId>
+            <artifactId>common-exception</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.penovatech</groupId>
             <artifactId>common-dto</artifactId>
         </dependency>
     </dependencies>

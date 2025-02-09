@@ -1,169 +1,210 @@
 package com.penovatech.common.base.service;
 
-import com.penovatech.common.base.mapper.BaseMapper;
-import com.penovatech.common.base.repository.AbstractRepository;
-import com.penovatech.common.model.AbstractCriteria;
-import com.penovatech.common.model.AbstractDto;
+import com.penovatech.common.base.repository.AbstractJpaRepository;
 import com.penovatech.common.model.AbstractPersistable;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.FluentQuery;
+import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public abstract class AbstractServiceImpl<
-        M extends AbstractPersistable<I>,
-        C extends AbstractCriteria<I>,
-        D extends AbstractDto<I>,
-        I extends Comparable<I>,
-        R extends AbstractRepository<M, C, I>> implements AbstractService<M, C, D, I> {
+        MODEL extends AbstractPersistable<ID>,
+        ID extends Comparable<ID>,
+        REPOSITORY extends AbstractJpaRepository<MODEL, ID>>
+        implements AbstractService<MODEL, ID> {
+
+    protected final REPOSITORY repository;
 
     @SuppressWarnings("unchecked")
-    public AbstractServiceImpl(R repository, BaseMapper<M, D> mapper) {
+    public AbstractServiceImpl(REPOSITORY repository) {
         this.repository = repository;
-        this.mapper = mapper;
-    }
-
-    protected R repository;
-    protected BaseMapper<M, D> mapper;
-
-    @Transactional
-    @Override
-    public M save(D dto) {
-        Assert.notNull(dto, "DTO cannot be null");
-        Assert.isNull(dto.getId(), "DTO`s id in save case must be null.");
-        M model = mapper.toModel(dto);
-        return repository.save(model);
-    }
-
-    @Transactional
-    @Override
-    public List<M> saveModel(List<M> modelList) {
-        Assert.notEmpty(modelList, "Model list cannot be empty");
-        return repository.save(modelList);
-    }
-
-    @Transactional
-    @Override
-    public List<M> save(List<D> dtoList) {
-        Assert.notEmpty(dtoList, "DTO list cannot be empty");
-        List<M> modelList = new ArrayList<>();
-        for (D d : dtoList) {
-            modelList.add(mapper.toModel(d));
-        }
-        return this.saveModel(modelList);
-    }
-
-    @Transactional
-    @Override
-    public M save(M model) {
-        Assert.notNull(model, "Model cannot be null");
-        return repository.save(model);
-    }
-
-    @Transactional
-    @Override
-    public M update(D dto) {
-        Assert.notNull(dto, "DTO cannot be null");
-        Assert.notNull(dto.getId(), "DTO`s id cannot be null");
-        Optional<M> model = this.get(dto.getId());
-        Assert.isTrue(model.isPresent(), "Model not fount with DTO`s id");
-        mapper.updateModelFromDto(model.get(), dto);
-        return this.update(model.get());
-    }
-
-    @Transactional
-    @Override
-    public M update(M model) {
-        Assert.notNull(model, "Model cannot be null");
-        Assert.notNull(model.getId(), "Model`s id cannot be null");
-        return repository.update(model);
     }
 
     @Override
-    public Optional<M> get(I id) {
-        Assert.notNull(id, "ID cannot be null");
-        return repository.get(id);
+    public <SUB_MODEL extends MODEL> SUB_MODEL saveAndFlush(SUB_MODEL entity) {
+        return repository.saveAndFlush(entity);
     }
 
     @Override
-    public List<M> get(List<I> idList) {
-        Assert.notEmpty(idList, "ID list cannot be empty");
-        return repository.get(idList);
+    public <SUB_MODEL extends MODEL> List<SUB_MODEL> saveAllAndFlush(Iterable<SUB_MODEL> entities) {
+        return repository.saveAllAndFlush(entities);
     }
 
     @Override
-    public List<M> getAll() {
-        return repository.getAll();
+    public <SUB_MODEL extends MODEL> List<SUB_MODEL> saveAll(Iterable<SUB_MODEL> entities) {
+        return repository.saveAll(entities);
     }
 
     @Override
-    public List<D> getAllDto() {
-        List<M> all = repository.getAll();
-        if (CollectionUtils.isEmpty(all)) {
-            return Collections.emptyList();
-        }
-        return mapper.toDtoList(all);
+    public <SUB_MODEL extends MODEL> SUB_MODEL save(SUB_MODEL entity) {
+        return repository.save(entity);
     }
 
     @Override
-    public List<M> get(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.get(criteria);
+    public void deleteAllInBatch(Iterable<MODEL> entities) {
+        repository.deleteAllInBatch(entities);
     }
 
     @Override
-    public Optional<M> getFirst(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.getFirst(criteria);
+    public void deleteAllByIdInBatch(Iterable<ID> ids) {
+        repository.deleteAllByIdInBatch(ids);
     }
 
     @Override
-    public Optional<M> getLast(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.getLast(criteria);
+    public void deleteAllInBatch() {
+        repository.deleteAllInBatch();
     }
 
     @Override
-    public long getCount(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.getCount(criteria);
+    public void deleteById(ID id) {
+        repository.deleteById(id);
     }
 
     @Override
-    public boolean isExist(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.isExist(criteria);
+    public void delete(MODEL entity) {
+        repository.delete(entity);
     }
 
     @Override
-    public boolean isNotExist(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.isNotExist(criteria);
+    public void deleteAllById(Iterable<? extends ID> ids) {
+        repository.deleteAllById(ids);
     }
 
-    @Transactional
     @Override
-    public long delete(C criteria) {
-        Assert.notNull(criteria, "Criteria cannot be null");
-        return repository.delete(criteria);
+    public void deleteAll(Iterable<? extends MODEL> entities) {
+        repository.deleteAll(entities);
     }
 
-    @Transactional
     @Override
-    public long delete(I id) {
-        Assert.notNull(id, "ID cannot be null");
-        return repository.delete(id);
+    public void deleteAll() {
+        repository.deleteAll();
     }
 
-    @Transactional
     @Override
-    public long delete(List<I> idList) {
-        Assert.notEmpty(idList, "ID list cannot be empty");
-        return repository.delete(idList);
+    public long delete(@Nullable Specification<MODEL> spec) {
+        return repository.delete(spec);
     }
+
+    @Override
+    public MODEL getReferenceById(ID id) {
+        return repository.getReferenceById(id);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> List<SUB_MODEL> findAll(Example<SUB_MODEL> example) {
+        return repository.findAll(example);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> List<SUB_MODEL> findAll(Example<SUB_MODEL> example, Sort sort) {
+        return repository.findAll(example, sort);
+    }
+
+    @Override
+    public List<MODEL> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public List<MODEL> findAllById(Iterable<ID> ids) {
+        return repository.findAllById(ids);
+    }
+
+    @Override
+    public List<MODEL> findAll(Sort sort) {
+        return repository.findAll(sort);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> Optional<SUB_MODEL> findOne(Example<SUB_MODEL> example) {
+        return repository.findOne(example);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> Page<SUB_MODEL> findAll(Example<SUB_MODEL> example, Pageable pageable) {
+        return repository.findAll(example, pageable);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL, R> R findBy(Example<SUB_MODEL> example, Function<FluentQuery.FetchableFluentQuery<SUB_MODEL>, R> queryFunction) {
+        return repository.findBy(example, queryFunction);
+    }
+
+    @Override
+    public Optional<MODEL> findById(ID id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    public Page<MODEL> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    @Override
+    public Optional<MODEL> findOne(Specification<MODEL> spec) {
+        return repository.findOne(spec);
+    }
+
+    @Override
+    public List<MODEL> findAll(@Nullable Specification<MODEL> spec) {
+        return repository.findAll(spec);
+    }
+
+    @Override
+    public Page<MODEL> findAll(@Nullable Specification<MODEL> spec, Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    @Override
+    public List<MODEL> findAll(@Nullable Specification<MODEL> spec, Sort sort) {
+        return repository.findAll(spec, sort);
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL, R> R findBy(Specification<MODEL> spec, Function<FluentQuery.FetchableFluentQuery<SUB_MODEL>, R> queryFunction) {
+        return repository.findBy(spec, queryFunction);
+    }
+
+    @Override
+    public void flush() {
+        repository.flush();
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> long count(Example<SUB_MODEL> example) {
+        return repository.count();
+    }
+
+    @Override
+    public <SUB_MODEL extends MODEL> boolean exists(Example<SUB_MODEL> example) {
+        return repository.exists(example);
+    }
+
+    @Override
+    public boolean existsById(ID id) {
+        return repository.existsById(id);
+    }
+
+    @Override
+    public long count() {
+        return repository.count();
+    }
+
+    @Override
+    public long count(@Nullable Specification<MODEL> spec) {
+        return repository.count(spec);
+    }
+
+    @Override
+    public boolean exists(Specification<MODEL> spec) {
+        return repository.exists(spec);
+    }
+
 }
-
