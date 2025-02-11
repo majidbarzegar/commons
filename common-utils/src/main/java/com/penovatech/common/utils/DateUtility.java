@@ -13,4 +13,8 @@ public class DateUtility {
         return nowToFormat(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     }
 
+    public static String nowToTimestampWithMillisFormat(){
+        return nowToFormat(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+    }
+
 }

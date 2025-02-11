@@ -33,8 +33,8 @@ public abstract class AbstractSpecServiceImpl<
     private Specification<MODEL> createSpecification(CRITERIA criteria) {
         SpecPredicateBuilder<MODEL> predicateBuilder = new SpecPredicateBuilder<>();
         this.addSpec(predicateBuilder, criteria);
-        predicateBuilder.in(AbstractPersistable_.ID, criteria.getIdIn(), CollectionUtils.isEmpty(criteria.getIdIn()));
-        predicateBuilder.notIn(AbstractPersistable_.ID, criteria.getIdNotIn(), CollectionUtils.isEmpty(criteria.getIdNotIn()));
+        predicateBuilder.in(AbstractPersistable_.ID, criteria.getIdIn(), !CollectionUtils.isEmpty(criteria.getIdIn()));
+        predicateBuilder.notIn(AbstractPersistable_.ID, criteria.getIdNotIn(), !CollectionUtils.isEmpty(criteria.getIdNotIn()));
         return predicateBuilder.build();
     }
 
