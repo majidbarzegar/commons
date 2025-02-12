@@ -159,7 +159,7 @@ public abstract class AbstractServiceImpl<
 
     @Override
     public Page<MODEL> findAll(@Nullable Specification<MODEL> spec, Pageable pageable) {
-        return repository.findAll(pageable);
+        return repository.findAll(spec, pageable);
     }
 
     @Override
