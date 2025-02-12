@@ -11,8 +11,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class ExceptionControllerAdvice {
@@ -39,7 +44,33 @@ public abstract class ExceptionControllerAdvice {
                         ex.getCode().toString(),
                         this.getMessage(ex.getMessageKey(), ex.getArgs())
                 ),
-                HttpStatus.INTERNAL_SERVER_ERROR
+                HttpStatus.NOT_ACCEPTABLE
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handle(MethodArgumentNotValidException ex) {
+        if (null == ex || CollectionUtils.isEmpty(ex.getBindingResult().getFieldErrors())) {
+            int randomTrackingNo = RandomUtils.secure().nextInt(100000, 999999);
+            LOGGER.error("trackingNo:{}, exception occur: {}", randomTrackingNo, ex);
+            return new ResponseEntity(
+                    new ResultDto<>(
+                            CommonExceptionMessage.INTERNAL_SERVER_ERROR.getCode().toString(),
+                            this.getMessage(CommonExceptionMessage.INTERNAL_SERVER_ERROR.getMessageKey(), randomTrackingNo)
+                    ),
+                    HttpStatus.NOT_ACCEPTABLE
+            );
+        }
+        List<String> messageList = new ArrayList<>();
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            messageList.add(this.getMessage(fieldError.getDefaultMessage()));
+        }
+        return new ResponseEntity(
+                new ResultDto<>(
+                        CommonExceptionMessage.INPUT_VALIDATION_ERROR.getCode().toString(),
+                        String.join(" | ", messageList)
+                ),
+                HttpStatus.NOT_ACCEPTABLE
         );
     }
 
@@ -51,7 +82,7 @@ public abstract class ExceptionControllerAdvice {
                         CommonExceptionMessage.INTERNAL_SERVER_ERROR.getCode().toString(),
                         this.getMessage(CommonExceptionMessage.INTERNAL_SERVER_ERROR.getMessageKey(), randomTrackingNo)
                 ),
-                HttpStatus.INTERNAL_SERVER_ERROR
+                HttpStatus.NOT_ACCEPTABLE
         );
     }
 
