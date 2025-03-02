@@ -1,7 +1,3 @@
-Certainly! Below is a sample `README.md` file for your `commons` project. This README provides an overview of the project, its modules, and how to use them. You can customize it further based on your specific needs.
-
----
-
 # Commons Project
 
 The **Commons Project** is a collection of reusable modules designed to simplify development by providing common functionalities, base classes, and utilities for Java applications. These modules can be used across multiple projects to ensure consistency and reduce boilerplate code.
