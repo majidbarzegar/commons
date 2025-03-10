@@ -10,4 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AbstractUserDto<I extends Comparable<I>> extends AbstractDto<I>{
+    public AbstractUserDto(I id) {
+        super(id);
+    }
 }
